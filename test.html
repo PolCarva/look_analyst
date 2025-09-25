@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba API - Análisis de Prendas</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .upload-area:hover {
+            border-color: #007bff;
+            background-color: #f8f9fa;
+        }
+        .upload-area.dragover {
+            border-color: #007bff;
+            background-color: #e3f2fd;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 5px;
+            display: none;
+        }
+        .result.success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .result.error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .clothing-tag {
+            background-color: #e9ecef;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+        .tag-item {
+            background-color: #007bff;
+            color: white;
+            padding: 2px 8px;
+            margin: 2px;
+            border-radius: 12px;
+            font-size: 12px;
+            display: inline-block;
+        }
+        .loading {
+            text-align: center;
+            color: #007bff;
+        }
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .file-info {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧥 Análisis de Prendas de Ropa</h1>
+        
+        <div class="upload-area" id="uploadArea">
+            <p>📸 Arrastra una imagen aquí o haz clic para seleccionar</p>
+            <p><small>Máximo 8MB - Formatos: JPG, PNG, GIF, WebP (no AVIF)</small></p>
+            <input type="file" id="fileInput" accept="image/*">
+        </div>
+         <div style="text-align: center;">
+            <button id="analyzeBtn" type="button" disabled>🔍 Analizar Imagen</button>
+            <button type="button" onclick="clearResults()">🗑️ Limpiar</button>
+        </div>
+        
+        <div id="fileInfo" class="file-info" style="display: none;"></div>
+        
+        <div style="margin: 20px 0; padding: 20px; background-color: #f8f9fa; border-radius: 10px; border-left: 4px solid #28a745;">
+            <h3 style="margin-top: 0; color: #28a745;">🔗 O desde URL</h3>
+            <p><small>Pega la URL de una imagen (Pinterest, Instagram, etc.)</small></p>
+            <input type="url" id="urlInput" placeholder="https://ejemplo.com/imagen.jpg" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px;">
+            <button id="analyzeUrlBtn" type="button" disabled>🔍 Analizar desde URL</button>
+        </div>
+        
+        <div style="margin: 20px 0; padding: 20px; background-color: #fff3cd; border-radius: 10px; border-left: 4px solid #ffc107;">
+            <h3 style="margin-top: 0; color: #856404;">📌 Pinterest Específico</h3>
+            <p><small>Análisis optimizado para URLs de Pinterest</small></p>
+            <form id="pinterestForm" style="display: flex; gap: 10px; align-items: center;">
+                <input type="text" id="pinterestInput" placeholder="Enter Pinterest URL..." 
+                       pattern="https:\/\/((\w+\.)?pinterest\.(com|co\.uk|de|fr|it|es|nl|se|ch|co\.in|br|au|at|cl|jp|ru|ie|ca|mx|nz|pt|ph)\/.+|pin\.it\/.+)"
+                       style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px;" required>
+                <button type="button" onclick="pastePinterestUrl()" style="background: #6c757d; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer;" title="Pegar URL">
+                    📋
+                </button>
+                <button type="submit" id="pinterestBtn" style="background: #e60023; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                    📌 Analizar Pinterest
+                </button>
+            </form>
+            <div id="pinterestProgress" style="height: 4px; width: 0%; background-color: #e60023; margin-top: 10px; border-radius: 2px; transition: width 0.3s ease;"></div>
+        </div>
+        
+       
+        
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        // Detectar la URL base dinámicamente
+        const API_BASE_URL = window.location.origin;
+        
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const urlInput = document.getElementById('urlInput');
+        const analyzeUrlBtn = document.getElementById('analyzeUrlBtn');
+        const pinterestForm = document.getElementById('pinterestForm');
+        const pinterestInput = document.getElementById('pinterestInput');
+        const pinterestBtn = document.getElementById('pinterestBtn');
+        const pinterestProgress = document.getElementById('pinterestProgress');
+        const result = document.getElementById('result');
+
+        // Event listeners para drag & drop
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', handleDragOver);
+        uploadArea.addEventListener('dragleave', handleDragLeave);
+        uploadArea.addEventListener('drop', handleDrop);
+        fileInput.addEventListener('change', handleFileSelect);
+        analyzeBtn.addEventListener('click', analyzeImage);
+        
+        // Event listeners para URL
+        urlInput.addEventListener('input', handleUrlInput);
+        analyzeUrlBtn.addEventListener('click', analyzeFromUrl);
+        
+        // Event listeners para Pinterest
+        pinterestForm.addEventListener('submit', handlePinterestSubmit);
+        pinterestInput.addEventListener('input', handlePinterestInput);
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        }
+
+        function handleFile(file) {
+            // Validar tipo de archivo
+            if (!file.type.startsWith('image/')) {
+                showResult('❌ Solo se permiten archivos de imagen', 'error');
+                return;
+            }
+
+            // Validar tamaño (8MB)
+            const maxSize = 8 * 1024 * 1024;
+            if (file.size > maxSize) {
+                showResult('❌ El archivo es demasiado grande. Máximo 8MB', 'error');
+                return;
+            }
+
+            // Mostrar información del archivo
+            fileInfo.innerHTML = `
+                <strong>📁 Archivo seleccionado:</strong> ${file.name}<br>
+                <strong>📏 Tamaño:</strong> ${(file.size / 1024 / 1024).toFixed(2)} MB<br>
+                <strong>📋 Tipo:</strong> ${file.type}
+            `;
+            fileInfo.style.display = 'block';
+            
+            analyzeBtn.disabled = false;
+        }
+
+        async function analyzeImage() {
+            const file = fileInput.files[0];
+            if (!file) {
+                console.log('No hay archivo seleccionado');
+                return;
+            }
+
+            console.log('Iniciando análisis de imagen:', file.name);
+            analyzeBtn.disabled = true;
+            showLoading();
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                console.log('Enviando petición a la API...');
+                const response = await fetch(`${API_BASE_URL}/analyze-clothing`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                console.log('Respuesta recibida:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('Datos recibidos:', data);
+
+                if (data.success) {
+                    if (data.clothingTags && data.clothingTags.length > 0) {
+                        let html = `<h3>✅ Análisis completado - ${data.count} prenda(s) encontrada(s)</h3>`;
+                        html += `<p><small>Modelo usado: ${data.modelUsed}</small></p>`;
+                        html += '<div class="clothing-tags">';
+                        data.clothingTags.forEach((tagArray, index) => {
+                            html += `<div class="clothing-tag">`;
+                            html += `<strong>Prenda ${index + 1}:</strong> `;
+                            html += tagArray.map(tag => `<span class="tag-item">${tag}</span>`).join(' ');
+                            html += `</div>`;
+                        });
+                        html += '</div>';
+                        showResult(html, 'success');
+                    } else {
+                        showResult(`ℹ️ ${data.message}`, 'success');
+                    }
+                } else {
+                    showResult(`❌ Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error en la petición:', error);
+                showResult(`💥 Error de conexión: ${error.message}<br><small>Asegúrate de que el servidor esté ejecutándose en ${API_BASE_URL}</small>`, 'error');
+            } finally {
+                analyzeBtn.disabled = false;
+            }
+        }
+
+        function showLoading() {
+            result.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>🔍 Analizando imagen con Gemini AI...</p>
+                </div>
+            `;
+            result.className = 'result';
+            result.style.display = 'block';
+        }
+
+        function showResult(message, type) {
+            result.innerHTML = message;
+            result.className = `result ${type}`;
+            result.style.display = 'block';
+        }
+
+        // Funciones para manejar URLs
+        function handleUrlInput() {
+            const url = urlInput.value.trim();
+            analyzeUrlBtn.disabled = !isValidUrl(url);
+        }
+
+        function isValidUrl(string) {
+            try {
+                new URL(string);
+                return true;
+            } catch (_) {
+                return false;
+            }
+        }
+
+        async function analyzeFromUrl() {
+            const url = urlInput.value.trim();
+            if (!url) {
+                showResult('❌ Por favor ingresa una URL válida', 'error');
+                return;
+            }
+
+            showLoading();
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/analyze-clothing`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        imageUrl: url
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    if (data.clothingTags && data.clothingTags.length > 0) {
+                        let html = `<h3>✅ Análisis completado - ${data.count} prenda(s) encontrada(s)</h3>`;
+                        html += `<p><small>Modelo usado: ${data.modelUsed}</small></p>`;
+                        html += `<p><small>URL analizada: <a href="${url}" target="_blank">${url}</a></small></p>`;
+                        html += '<div class="clothing-tags">';
+                        data.clothingTags.forEach((tagArray, index) => {
+                            html += `<div class="clothing-tag">`;
+                            html += `<strong>Prenda ${index + 1}:</strong> `;
+                            html += tagArray.map(tag => `<span class="tag-item">${tag}</span>`).join(' ');
+                            html += `</div>`;
+                        });
+                        html += '</div>';
+                        showResult(html, 'success');
+                    } else {
+                        showResult(`ℹ️ ${data.message}`, 'success');
+                    }
+                } else {
+                    showResult(`❌ Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showResult(`❌ Error de conexión: ${error.message}`, 'error');
+            }
+        }
+
+        // Funciones para manejar Pinterest
+        function handlePinterestInput() {
+            const url = pinterestInput.value.trim();
+            pinterestBtn.disabled = !isValidPinterestUrl(url);
+        }
+
+        function isValidPinterestUrl(string) {
+            const pinterestRegex = /^https:\/\/((\w+\.)?pinterest\.(com|co\.uk|de|fr|it|es|nl|se|ch|co\.in|br|au|at|cl|jp|ru|ie|ca|mx|nz|pt|ph)\/.+|pin\.it\/.+)/;
+            return pinterestRegex.test(string);
+        }
+
+        function pastePinterestUrl() {
+            navigator.clipboard.readText().then(text => {
+                if (isValidPinterestUrl(text)) {
+                    pinterestInput.value = text;
+                    pinterestBtn.disabled = false;
+                    showSnackbar("URL de Pinterest pegada exitosamente!");
+                } else {
+                    showSnackbar("URL inválida. Por favor ingresa una URL válida de Pinterest.");
+                }
+            }).catch(() => {
+                showSnackbar("Error al leer el portapapeles.");
+            });
+        }
+
+        function showSnackbar(message) {
+            // Crear snackbar si no existe
+            let snackbar = document.getElementById('snackbar');
+            if (!snackbar) {
+                snackbar = document.createElement('div');
+                snackbar.id = 'snackbar';
+                snackbar.style.cssText = `
+                    position: fixed;
+                    bottom: 20px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: #333;
+                    color: white;
+                    padding: 12px 24px;
+                    border-radius: 4px;
+                    z-index: 1000;
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
+                `;
+                document.body.appendChild(snackbar);
+            }
+            
+            snackbar.textContent = message;
+            snackbar.style.opacity = '1';
+            
+            setTimeout(() => {
+                snackbar.style.opacity = '0';
+            }, 3000);
+        }
+
+        function updateProgress(percent) {
+            pinterestProgress.style.width = percent + '%';
+        }
+
+        async function handlePinterestSubmit(e) {
+            e.preventDefault();
+            const url = pinterestInput.value.trim();
+            
+            if (!url) {
+                showSnackbar('Por favor ingresa una URL de Pinterest válida');
+                return;
+            }
+
+            showLoading();
+            updateProgress(10);
+            
+            try {
+                updateProgress(30);
+                
+                const response = await fetch(`${API_BASE_URL}/download`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ url: url })
+                });
+
+                updateProgress(70);
+                const data = await response.json();
+                updateProgress(100);
+                
+                if (data.success) {
+                    if (data.clothingTags && data.clothingTags.length > 0) {
+                        let html = `<h3>✅ Análisis de Pinterest completado - ${data.count} prenda(s) encontrada(s)</h3>`;
+                        html += `<p><small>Modelo usado: ${data.modelUsed}</small></p>`;
+                        html += `<p><small>URL de Pinterest: <a href="${data.sourceUrl}" target="_blank">${data.sourceUrl}</a></small></p>`;
+                        html += '<div class="clothing-tags">';
+                        data.clothingTags.forEach((tagArray, index) => {
+                            html += `<div class="clothing-tag">`;
+                            html += `<strong>Prenda ${index + 1}:</strong> `;
+                            html += tagArray.map(tag => `<span class="tag-item">${tag}</span>`).join(' ');
+                            html += `</div>`;
+                        });
+                        html += '</div>';
+                        showResult(html, 'success');
+                    } else {
+                        showResult(`ℹ️ ${data.message}`, 'success');
+                    }
+                } else {
+                    showResult(`❌ Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showResult(`❌ Error de conexión: ${error.message}`, 'error');
+            } finally {
+                updateProgress(0);
+            }
+        }
+
+        function clearResults() {
+            result.style.display = 'none';
+            fileInfo.style.display = 'none';
+            fileInput.value = '';
+            urlInput.value = '';
+            pinterestInput.value = '';
+            analyzeBtn.disabled = true;
+            analyzeUrlBtn.disabled = true;
+            pinterestBtn.disabled = true;
+            updateProgress(0);
+        }
+    </script>
+</body>
+</html>
