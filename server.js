@@ -988,7 +988,7 @@ const specificSearch = \`\${tags[0]} \${tags[1]}\`; // "blazer gris"</pre>
     
     <h2>Frontend de Prueba</h2>
     <p>Accede al frontend interactivo en <code>GET /test</code> para probar ambos endpoints:</p>
-    <p><strong>URL:</strong> <a href="${FRONTEND_URL}/test" target="_blank">${FRONTEND_URL}/test</a></p>
+    <p><strong>URL:</strong> <a href="${FRONTEND_URL}test" target="_blank">${FRONTEND_URL}test</a></p>
     <ul>
         <li><strong>Subida de archivos:</strong> Drag & drop o selección manual</li>
         <li><strong>URLs generales:</strong> Análisis directo de URLs de imagen</li>
