@@ -13,7 +13,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const MAX_FILE_SIZE = parseInt(process.env.MAX_FILE_SIZE) || 8 * 1024 * 1024; // 8MB por defecto
 const UPLOAD_DIR = process.env.UPLOAD_DIR || 'uploads';
-const FRONTEND_URL = process.env.FRONTEND_URL || `http://localhost:${PORT}`;
+const FRONTEND_URL = process.env.FRONTEND_URL || `https://lookanalyst.up.railway.app`;
 
 // Configurar CORS
 app.use(cors());
@@ -775,13 +775,13 @@ app.get('/', (req, res) => {
     
     <h3>Ejemplo con cURL - Archivo</h3>
     <pre>curl -X POST \\
-  http://localhost:${PORT}/analyze-clothing \\
+  https://lookanalyst.up.railway.app/analyze-clothing \\
   -H 'Content-Type: multipart/form-data' \\
   -F 'image=@ruta/a/tu/imagen.jpg'</pre>
     
     <h3>Ejemplo con cURL - URL</h3>
     <pre>curl -X POST \\
-  http://localhost:${PORT}/analyze-clothing \\
+  https://lookanalyst.up.railway.app/analyze-clothing \\
   -H 'Content-Type: application/json' \\
   -d '{"imageUrl": "https://example.com/imagen.jpg"}'</pre>
     
@@ -789,7 +789,7 @@ app.get('/', (req, res) => {
     <pre>const formData = new FormData();
 formData.append('image', fileInput.files[0]);
 
-const response = await fetch('http://localhost:${PORT}/analyze-clothing', {
+const response = await fetch('https://lookanalyst.up.railway.app/analyze-clothing', {
   method: 'POST',
   body: formData
 });
@@ -798,7 +798,7 @@ const data = await response.json();
 console.log(data);</pre>
     
     <h3>Ejemplo con JavaScript (Fetch) - URL</h3>
-    <pre>const response = await fetch('http://localhost:${PORT}/analyze-clothing', {
+    <pre>const response = await fetch('https://lookanalyst.up.railway.app/analyze-clothing', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json'
@@ -842,12 +842,12 @@ console.log(data);</pre>
     
     <h3>Ejemplo con cURL - Pinterest</h3>
     <pre>curl -X POST \\
-  http://localhost:${PORT}/download \\
+  https://lookanalyst.up.railway.app/download \\
   -H 'Content-Type: application/json' \\
   -d '{"url": "https://www.pinterest.com/pin/5348093303823893/"}'</pre>
     
     <h3>Ejemplo con JavaScript (Fetch) - Pinterest</h3>
-    <pre>const response = await fetch('http://localhost:${PORT}/download', {
+    <pre>const response = await fetch('https://lookanalyst.up.railway.app/download', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json'
@@ -1051,8 +1051,8 @@ app.use((error, req, res, next) => {
 
 // Iniciar servidor
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor ejecutándose en http://localhost:${PORT}`);
-  console.log(`📸 Endpoint: POST http://localhost:${PORT}/analyze-clothing`);
+  console.log(`🚀 Servidor ejecutándose en https://lookanalyst.up.railway.app`);
+  console.log(`📸 Endpoint: POST https://lookanalyst.up.railway.app/analyze-clothing`);
 });
 
 module.exports = app;

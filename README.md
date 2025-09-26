@@ -50,7 +50,7 @@ Analiza una imagen de ropa y devuelve arrays de tags individuales.
 
 ```bash
 curl -X POST \
-  http://localhost:3000/analyze-clothing \
+  http://lookanalyst.up.railway.app/analyze-clothing \
   -H 'Content-Type: multipart/form-data' \
   -F 'image=@ruta/a/tu/imagen.jpg'
 ```
