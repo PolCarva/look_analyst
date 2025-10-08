@@ -777,6 +777,7 @@ app.get('/', (req, res) => {
     
     <h3>Parámetros</h3>
     <ul>
+        <li><strong>lang:</strong> Lenguaje de respuesta. Se pasa por URL (ej: <code>/analyze-clothing?lang=en</code>)</li>
         <li><strong>image:</strong> Archivo de imagen (máximo <strong>${Math.round(MAX_FILE_SIZE / (1024 * 1024))}MB</strong>)</li>
         <li><strong>imageUrl:</strong> URL de imagen (alternativa al archivo)</li>
         <li><strong>Formatos soportados:</strong> JPG, PNG, GIF, WebP</li>
@@ -828,6 +829,7 @@ console.log(data);</pre>
     
     <h3>Características</h3>
     <ul>
+        <li><strong>lang:</strong> Lenguaje de respuesta. Se pasa por URL (ej: <code>/analyze-clothing?lang=en</code>)</li>
         <li><strong>Scraping inteligente:</strong> Utiliza 6 estrategias diferentes para encontrar la imagen principal</li>
         <li><strong>Meta tags:</strong> Busca en og:image para máxima confiabilidad</li>
         <li><strong>JSON-LD:</strong> Extrae datos estructurados de la página</li>
