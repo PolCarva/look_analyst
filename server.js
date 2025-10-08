@@ -19,6 +19,15 @@ const FRONTEND_URL = process.env.FRONTEND_URL || `https://lookanalyst.up.railway
 app.use(cors());
 app.use(express.json());
 
+// Middleware para manejar el idioma
+app.use((req, res, next) => {
+  const supportedLangs = ['es', 'en', 'pt', 'fr', 'it', 'de'];
+  const langParam = req.query.lang?.toLowerCase();
+
+  req.lang = supportedLangs.includes(langParam) ? langParam : 'es';
+  next();
+});
+
 // Configurar Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
@@ -403,6 +412,7 @@ async function analyzeImageWithGemini(imagePath, mimeType) {
     2: [pantalón, negro, skinny, denim, ajustado]
 
     Si no encuentras prendas de ropa, responde: "No se encontraron prendas de ropa en la imagen."
+    IMPORTANTE: responde TODO en el idioma "${req.lang}".
     `;
 
     const imagePart = fileToGenerativePart(imagePath, mimeType);
@@ -496,6 +506,7 @@ app.post('/analyze-clothing', upload.single('image'), async (req, res) => {
     2: [pantalón, negro, skinny, denim, ajustado]
 
     Si no encuentras prendas de ropa, responde: "No se encontraron prendas de ropa en la imagen."
+    IMPORTANTE: responde TODO en el idioma "${req.lang}".
     `;
 
     const imagePart = fileToGenerativePart(imagePath, mimeType);
@@ -1048,6 +1059,8 @@ app.use((error, req, res, next) => {
     details: error.message
   });
 });
+
+
 
 // Iniciar servidor
 app.listen(PORT, () => {
