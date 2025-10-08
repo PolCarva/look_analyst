@@ -263,7 +263,7 @@
 
             try {
                 console.log('Enviando petición a la API...');
-                const response = await fetch(`${API_BASE_URL}/analyze-clothing`, {
+                const response = await fetch(`${API_BASE_URL}/analyze-clothing?lang=en`, {
                     method: 'POST',
                     body: formData
                 });
